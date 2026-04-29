@@ -86,6 +86,9 @@ export function ScrollPin({
       lenis.on('scroll', ScrollTrigger.update);
       gsap.ticker.add(tick);
       gsap.ticker.lagSmoothing(0);
+      // [LAW:one-source-of-truth] Lenis owns scroll position; hide the native
+      // scrollbar so it doesn't compete visually with the locked-in chrome.
+      document.documentElement.classList.add('sk-lenis-active');
 
       const holdRatio = Math.max(0, 1 - lockInRatio);
       const tl = gsap.timeline({
@@ -117,6 +120,7 @@ export function ScrollPin({
           lenis.destroy();
           lenis = null;
         }
+        document.documentElement.classList.remove('sk-lenis-active');
         gsap.set(section, { clearProps: 'all' });
         gsap.set(card, { clearProps: 'all' });
       };
