@@ -24,7 +24,8 @@
   "scripts": {
     "build": "tsc -b && vite build",
     "dev": "vite",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
