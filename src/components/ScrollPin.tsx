@@ -14,9 +14,11 @@ export interface ScrollPinProps {
    */
   pinLength?: string;
   /**
-   * Of the pin scroll, what fraction is the lock-in animation
-   * (windowed → fullscreen). The remainder is "hold at fullscreen."
-   * Default 0.45.
+   * Of the pin scroll, what fraction is spent on each zoom direction.
+   * The animation runs as: zoom-in (`lockInRatio`) → hold at fullscreen
+   * (`1 - 2 * lockInRatio`) → zoom-out (`lockInRatio`). The pin
+   * releases with the card already back at its windowed geometry, so
+   * the exit looks symmetric to the entry. Default 0.35.
    */
   lockInRatio?: number;
   /** Initial windowed inset (top/bottom) in pixels. Default 28. */
@@ -60,7 +62,7 @@ export interface ScrollPinProps {
 export function ScrollPin({
   children,
   pinLength = '+=180%',
-  lockInRatio = 0.45,
+  lockInRatio = 0.35,
   inset = 28,
   maxWidth = 'var(--sk-content-max-width, 1052px)',
   radius = 16,
@@ -104,7 +106,15 @@ export function ScrollPin({
       // scrollbar so it doesn't compete visually with the locked-in chrome.
       document.documentElement.classList.add('sk-lenis-active');
 
-      const holdRatio = Math.max(0, 1 - lockInRatio);
+      // [LAW:dataflow-not-control-flow] Capture the *current* CSS values so
+      // the zoom-out tween returns to the same state the page started in.
+      // No special-case for "scrolling up vs down" — the timeline plays
+      // forward when scrolling in, reverses when scrolling out, and ends
+      // exactly where it began.
+      const origPadding = getComputedStyle(section).padding;
+      const origRadius = getComputedStyle(card).borderRadius;
+      const origShadow = getComputedStyle(card).boxShadow;
+      const holdRatio = Math.max(0, 1 - 2 * lockInRatio);
       const tl = gsap.timeline({
         defaults: { ease: 'power3.out' },
         scrollTrigger: {
@@ -118,13 +128,23 @@ export function ScrollPin({
           invalidateOnRefresh: true,
         },
       });
+      // Zoom in: column → full bleed.
       tl.to(section, { padding: 0, duration: lockInRatio }, 0)
         .to(card, {
           borderRadius: 0,
           boxShadow: '0 0 0 rgba(0,0,0,0)',
           duration: lockInRatio,
         }, 0)
-        .to({}, { duration: holdRatio });
+        // Hold at full bleed.
+        .to({}, { duration: holdRatio })
+        // Zoom out: full bleed → column. Mirrors the in-zoom so the pin
+        // releases at the original card geometry, not at full bleed.
+        .to(section, { padding: origPadding, duration: lockInRatio })
+        .to(card, {
+          borderRadius: origRadius,
+          boxShadow: origShadow,
+          duration: lockInRatio,
+        }, '<');
 
       return () => {
         tl.scrollTrigger?.kill();
