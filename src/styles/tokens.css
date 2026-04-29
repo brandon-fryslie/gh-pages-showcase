@@ -45,4 +45,12 @@
   --sk-radius-sm: 4px;
   --sk-radius-md: 8px;
   --sk-radius-lg: 16px;
+
+  /* [LAW:one-source-of-truth] Page content column. Header/MetadataFooter
+     declare an outer max-width (--sk-content-outer-width) and inset their
+     content by --sk-sp-5; the resulting inner column is what ScrollPin's
+     card aligns with via --sk-content-max-width. Override either token to
+     retheme the column without re-declaring numbers. */
+  --sk-content-outer-width: 1100px;
+  --sk-content-max-width:   1052px; /* outer - 2 * --sk-sp-5 */
 }

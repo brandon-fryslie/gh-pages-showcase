@@ -6,7 +6,7 @@
   font-size: var(--sk-fs-body);
 }
 .sk-meta-inner {
-  max-width: 1100px;
+  max-width: var(--sk-content-outer-width, 1100px);
   margin: 0 auto;
   padding: var(--sk-sp-5) var(--sk-sp-5);
   display: flex;

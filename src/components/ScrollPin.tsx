@@ -22,12 +22,14 @@ export interface ScrollPinProps {
   /** Initial windowed inset (top/bottom) in pixels. Default 28. */
   inset?: number;
   /**
-   * Max-width of the unzoomed card in pixels. The card centers within the
-   * viewport at this width; on lock-in it animates to full bleed. Default
-   * 1100 to match typical content columns. Pass a very large number to
-   * disable (effectively full-width unzoomed).
+   * Max-width of the unzoomed card. Number = pixels; string = any CSS
+   * length (e.g. `'var(--sk-content-max-width)'`). The card centers
+   * within the viewport at this width; on lock-in it animates to full
+   * bleed. Defaults to the design token `--sk-content-max-width` so the
+   * card aligns with the inner column of the showcase-kit Header /
+   * MetadataFooter. Pass a very large number to disable.
    */
-  maxWidth?: number;
+  maxWidth?: number | string;
   /** Initial windowed border-radius in pixels. Default 16. */
   radius?: number;
   /**
@@ -60,10 +62,14 @@ export function ScrollPin({
   pinLength = '+=180%',
   lockInRatio = 0.45,
   inset = 28,
-  maxWidth = 1100,
+  maxWidth = 'var(--sk-content-max-width, 1052px)',
   radius = 16,
   mobileBreakpoint = 760,
-  scrub = 0.6,
+  // [LAW:one-source-of-truth] Lenis already smooths scroll; stacking
+  // ScrollTrigger's scrub easing on top compounds rather than composes
+  // (visible as zoom jank). 1:1 with scroll feels physical and removes
+  // the rubber-band lag.
+  scrub = true,
   className,
   style,
 }: ScrollPinProps) {
@@ -145,7 +151,8 @@ export function ScrollPin({
       className={['sk-pin-section', className].filter(Boolean).join(' ')}
       style={{
         ['--sk-pin-inset' as string]: `${inset}px`,
-        ['--sk-pin-max-width' as string]: `${maxWidth}px`,
+        ['--sk-pin-max-width' as string]:
+          typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
         ...style,
       }}
     >

@@ -4,7 +4,7 @@
   font-family: var(--sk-ff-sans);
 }
 .sk-header-inner {
-  max-width: 1100px;
+  max-width: var(--sk-content-outer-width, 1100px);
   margin: 0 auto;
   padding: var(--sk-sp-7) var(--sk-sp-5) var(--sk-sp-6);
 }
