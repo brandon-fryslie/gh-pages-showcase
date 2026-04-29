@@ -1,0 +1,30 @@
+.sk-pin-section {
+  position: relative;
+  height: 100vh;
+  padding: var(--sk-pin-inset, 28px);
+  background: var(--sk-bg);
+  box-sizing: border-box;
+}
+.sk-pin-card {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--sk-pin-radius, 16px);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: var(--sk-bg-elev-1);
+  overflow: hidden;
+  position: relative;
+  will-change: transform, border-radius;
+  transform: translateZ(0);
+}
+@media (max-width: 760px) {
+  /* Mobile: no pin. Card flows naturally; no inset frame. */
+  .sk-pin-section {
+    height: auto;
+    padding: 0;
+  }
+  .sk-pin-card {
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

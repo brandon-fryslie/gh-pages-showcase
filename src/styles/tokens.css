@@ -1,0 +1,48 @@
+/* Design tokens for showcase-kit components.
+ * Consumers import "showcase-kit/styles.css" once at the app entry. Override
+ * any of these on :root in the consumer's stylesheet to retheme. */
+:root {
+  /* GitHub-dark-leaning palette — what showcase pages tend to want by default. */
+  --sk-bg:            #0d1117;
+  --sk-bg-elev-1:     #161b22;
+  --sk-bg-elev-2:     #1a1f24;
+  --sk-bg-elev-3:     #21262d;
+  --sk-border:        #30363d;
+  --sk-border-soft:   #21262d;
+
+  --sk-fg:            #e6edf3;
+  --sk-fg-strong:     #c9d1d9;
+  --sk-fg-muted:      #8b949e;
+  --sk-fg-faint:      #6a7884;
+
+  --sk-accent:        #58a6ff;
+  --sk-accent-strong: #1f6feb;
+  --sk-warn:          #ffab70;
+  --sk-danger:        #ff7b72;
+  --sk-good:          #3fb950;
+  --sk-magic:         #d2a8ff;
+
+  /* Type scale — modular, base 13px. */
+  --sk-fs-eyebrow:    11px;
+  --sk-fs-body:       13px;
+  --sk-fs-tagline:    15px;
+  --sk-fs-h2:         20px;
+  --sk-fs-h1:         32px;
+  --sk-fs-display:    48px;
+
+  --sk-ff-sans:       -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --sk-ff-mono:       ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Spacing & radii. */
+  --sk-sp-1:  4px;
+  --sk-sp-2:  8px;
+  --sk-sp-3:  12px;
+  --sk-sp-4:  16px;
+  --sk-sp-5:  24px;
+  --sk-sp-6:  32px;
+  --sk-sp-7:  48px;
+
+  --sk-radius-sm: 4px;
+  --sk-radius-md: 8px;
+  --sk-radius-lg: 16px;
+}

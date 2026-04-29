@@ -1,0 +1,54 @@
+.sk-header {
+  background: var(--sk-bg);
+  color: var(--sk-fg);
+  font-family: var(--sk-ff-sans);
+}
+.sk-header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--sk-sp-7) var(--sk-sp-5) var(--sk-sp-6);
+}
+.sk-header-eyebrow {
+  margin: 0 0 var(--sk-sp-2);
+  font-size: var(--sk-fs-eyebrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sk-fg-muted);
+}
+.sk-header-name {
+  margin: 0 0 var(--sk-sp-3);
+  font-size: var(--sk-fs-display);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--sk-fg-strong);
+}
+.sk-header-tagline {
+  margin: 0 0 var(--sk-sp-4);
+  font-size: var(--sk-fs-tagline);
+  line-height: 1.5;
+  color: var(--sk-fg);
+  max-width: 60ch;
+}
+.sk-header-badges {
+  list-style: none;
+  margin: 0 0 var(--sk-sp-4);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sk-sp-2);
+}
+.sk-header-badge {
+  background: var(--sk-bg-elev-3);
+  border: 1px solid var(--sk-border);
+  color: var(--sk-fg-muted);
+  padding: 2px var(--sk-sp-2);
+  border-radius: 99px;
+  font-size: var(--sk-fs-eyebrow);
+  font-family: var(--sk-ff-mono);
+}
+.sk-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sk-sp-2);
+}

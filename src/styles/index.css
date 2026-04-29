@@ -1,0 +1,7 @@
+/* Single entrypoint a consumer imports once: `import "showcase-kit/styles.css"`.
+ * Pulls in the design tokens and the per-component stylesheets. */
+@import "./tokens.css";
+@import "../components/Header.css";
+@import "../components/MetadataFooter.css";
+@import "../components/CodeBlock.css";
+@import "../components/ScrollPin.css";

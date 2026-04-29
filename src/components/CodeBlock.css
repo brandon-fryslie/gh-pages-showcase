@@ -1,0 +1,24 @@
+.sk-code {
+  position: relative;
+  background: var(--sk-bg);
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-md);
+  font-family: var(--sk-ff-mono);
+}
+.sk-code-lang {
+  position: absolute;
+  top: var(--sk-sp-2);
+  right: var(--sk-sp-3);
+  font-size: var(--sk-fs-eyebrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sk-fg-faint);
+}
+.sk-code-pre {
+  margin: 0;
+  padding: var(--sk-sp-4);
+  font-size: var(--sk-fs-body);
+  color: var(--sk-fg-strong);
+  overflow-x: auto;
+  line-height: 1.55;
+}
