@@ -11,7 +11,13 @@ html.sk-lenis-active body::-webkit-scrollbar {
 .sk-pin-section {
   position: relative;
   height: 100vh;
-  padding: var(--sk-pin-inset, 28px);
+  /* [LAW:dataflow-not-control-flow] Vertical inset is fixed; horizontal
+     gutter is computed from viewport vs --sk-pin-max-width and falls back
+     to the inset on narrow viewports. Animating padding to 0 collapses
+     both gutters in one motion. */
+  padding: var(--sk-pin-inset, 28px)
+    max(var(--sk-pin-inset, 28px),
+      calc((100% - var(--sk-pin-max-width, 1100px)) / 2));
   background: var(--sk-bg);
   box-sizing: border-box;
 }
