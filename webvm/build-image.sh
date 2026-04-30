@@ -94,13 +94,17 @@ COMBINED="$WORKDIR/Dockerfile.combined"
   sed 's|^FROM showcase-kit-webvm-base:latest$|FROM webvm_base|' "$DOCKERFILE"
 } > "$COMBINED"
 
-log "building combined image (base + project) → $TAG"
-docker buildx build --load "${BUILD_ARGS[@]}" -t "$TAG" -f "$COMBINED" "$CONTEXT"
+# [LAW:single-enforcer] Always build linux/amd64. CheerpX is an x86-to-WASM
+# JIT — an ARM rootfs (the default on Apple Silicon hosts) makes /bin/bash
+# unloadable inside the VM ("ELF execution failed [-2]"). Lock the platform
+# here rather than trusting whatever the host defaults to.
+log "building combined image (linux/amd64, base + project) → $TAG"
+docker buildx build --platform linux/amd64 --load "${BUILD_ARGS[@]}" -t "$TAG" -f "$COMBINED" "$CONTEXT"
 [[ -n "$BASE_TAG" ]] && docker tag "$TAG" "$BASE_TAG" 2>/dev/null || true
 
 # 3. Export rootfs as a tar stream into the temp dir.
 log "exporting rootfs to $WORKDIR/rootfs.tar"
-CID="$(docker create "$TAG")"
+CID="$(docker create --platform linux/amd64 "$TAG")"
 [[ -n "$CID" ]] || die "docker create returned empty container id"
 docker export "$CID" > "$WORKDIR/rootfs.tar"
 docker rm "$CID" >/dev/null
