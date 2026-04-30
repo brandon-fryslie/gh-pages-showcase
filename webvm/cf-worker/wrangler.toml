@@ -1,0 +1,8 @@
+name = "showcase-kit-webvm-proxy"
+main = "worker.js"
+compatibility_date = "2025-04-01"
+workers_dev = false
+
+routes = [
+  { pattern = "webvm.tinkerpad.ai", custom_domain = true },
+]
