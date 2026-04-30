@@ -73,25 +73,32 @@ command -v docker >/dev/null || die "docker is required on PATH"
 mkdir -p "$(dirname "$OUT")"
 OUT_ABS="$(cd "$(dirname "$OUT")" && pwd)/$(basename "$OUT")"
 
-# --load forces the image into the local Docker images list so a subsequent
-# FROM <tag>:latest resolves locally instead of trying to pull from a registry.
-# On modern Docker Desktop the default builder is docker-container, which
-# stores results in the build cache by default — not where FROM looks.
-DOCKER_BUILD=(docker buildx build --load)
+# [LAW:single-enforcer] The build is a single buildx invocation against a
+# combined multi-stage Dockerfile. We can't rely on FROM resolving across
+# successive builds because buildx's docker-container driver keeps images in
+# its own cache, not in the host docker images list — so any cross-build
+# FROM <tag> tries the remote registry and fails. Concatenating Base +
+# project into one Dockerfile eliminates the race entirely.
 
-# 1. Build the base image if requested.
-if [[ -n "$BASE_TAG" ]]; then
-  log "building base image: $BASE_TAG"
-  "${DOCKER_BUILD[@]}" -t "$BASE_TAG" -f "$SCRIPT_DIR/Dockerfile.base" "$SCRIPT_DIR"
-fi
-
-# 2. Build the project rootfs image.
-log "building project image from $DOCKERFILE → $TAG"
-"${DOCKER_BUILD[@]}" "${BUILD_ARGS[@]}" -t "$TAG" -f "$DOCKERFILE" "$CONTEXT"
-
-# 3. Export rootfs as a tar stream into a temp dir.
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
+COMBINED="$WORKDIR/Dockerfile.combined"
+
+# Generate a stage name from the base FROM line and rewrite the project's
+# FROM showcase-kit-webvm-base:latest to point at that stage.
+{
+  sed 's/^FROM debian:bookworm-slim$/FROM debian:bookworm-slim AS webvm_base/' \
+    "$SCRIPT_DIR/Dockerfile.base"
+  echo
+  echo '# --- project layer (concatenated from project Dockerfile) ---'
+  sed 's|^FROM showcase-kit-webvm-base:latest$|FROM webvm_base|' "$DOCKERFILE"
+} > "$COMBINED"
+
+log "building combined image (base + project) → $TAG"
+docker buildx build --load "${BUILD_ARGS[@]}" -t "$TAG" -f "$COMBINED" "$CONTEXT"
+[[ -n "$BASE_TAG" ]] && docker tag "$TAG" "$BASE_TAG" 2>/dev/null || true
+
+# 3. Export rootfs as a tar stream into the temp dir.
 log "exporting rootfs to $WORKDIR/rootfs.tar"
 CID="$(docker create "$TAG")"
 [[ -n "$CID" ]] || die "docker create returned empty container id"
@@ -100,17 +107,23 @@ docker rm "$CID" >/dev/null
 [[ -s "$WORKDIR/rootfs.tar" ]] || die "exported rootfs tar is empty"
 
 # 4. mke2fs inside a tooling container so the host doesn't need e2fsprogs.
+# The tar is extracted *inside* the container's own filesystem (not the bind
+# mount) so macOS Docker's bind-mount permission quirks don't interfere with
+# files like usr/share/zoneinfo/right/* that have restrictive permissions.
 log "building ext2 image (size=$SIZE) → $OUT_ABS"
+# mke2fs writes to a path inside the container's own FS (macOS Docker
+# bind-mount permissions can fight us if it writes directly to a host
+# bind-mount). After it produces the image, stream it back out via stdout.
 docker run --rm -i \
-  -v "$WORKDIR":/work \
-  -v "$(dirname "$OUT_ABS")":/out \
+  -v "$WORKDIR":/work:ro \
   debian:bookworm-slim bash -c "
     set -euo pipefail
-    apt-get update >/dev/null && apt-get install -y --no-install-recommends e2fsprogs >/dev/null
-    mkdir -p /work/rootfs
-    tar -xf /work/rootfs.tar -C /work/rootfs
-    mke2fs -t ext2 -d /work/rootfs -m 0 -L webvm '/out/$(basename "$OUT_ABS")' '$SIZE'
-  "
+    apt-get update >/dev/null 2>&1 && apt-get install -y --no-install-recommends e2fsprogs >/dev/null 2>&1
+    mkdir -p /tmp/rootfs
+    tar -xpf /work/rootfs.tar -C /tmp/rootfs --numeric-owner 2>/dev/null
+    mke2fs -t ext2 -d /tmp/rootfs -m 0 -L webvm /tmp/disk.ext2 '$SIZE' >&2
+    cat /tmp/disk.ext2
+  " > "$OUT_ABS"
 
 [[ -s "$OUT_ABS" ]] || die "ext2 image was not produced"
 SIZE_BYTES="$(wc -c < "$OUT_ABS")"
