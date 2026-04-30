@@ -73,15 +73,21 @@ command -v docker >/dev/null || die "docker is required on PATH"
 mkdir -p "$(dirname "$OUT")"
 OUT_ABS="$(cd "$(dirname "$OUT")" && pwd)/$(basename "$OUT")"
 
+# --load forces the image into the local Docker images list so a subsequent
+# FROM <tag>:latest resolves locally instead of trying to pull from a registry.
+# On modern Docker Desktop the default builder is docker-container, which
+# stores results in the build cache by default — not where FROM looks.
+DOCKER_BUILD=(docker buildx build --load)
+
 # 1. Build the base image if requested.
 if [[ -n "$BASE_TAG" ]]; then
   log "building base image: $BASE_TAG"
-  docker build -t "$BASE_TAG" -f "$SCRIPT_DIR/Dockerfile.base" "$SCRIPT_DIR"
+  "${DOCKER_BUILD[@]}" -t "$BASE_TAG" -f "$SCRIPT_DIR/Dockerfile.base" "$SCRIPT_DIR"
 fi
 
 # 2. Build the project rootfs image.
 log "building project image from $DOCKERFILE → $TAG"
-docker build "${BUILD_ARGS[@]}" -t "$TAG" -f "$DOCKERFILE" "$CONTEXT"
+"${DOCKER_BUILD[@]}" "${BUILD_ARGS[@]}" -t "$TAG" -f "$DOCKERFILE" "$CONTEXT"
 
 # 3. Export rootfs as a tar stream into a temp dir.
 WORKDIR="$(mktemp -d)"
