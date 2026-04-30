@@ -22,5 +22,13 @@ export type { MetadataFooterProps, MetadataLink } from './components/MetadataFoo
 export { CodeBlock } from './components/CodeBlock.js';
 export type { CodeBlockProps } from './components/CodeBlock.js';
 
+export { WebVMTerminal } from './components/WebVMTerminal.js';
+export type {
+  WebVMTerminalProps,
+  WebVMDiskImage,
+  WebVMSuggestedCommand,
+} from './components/WebVMTerminal.js';
+export { isCrossOriginIsolated } from './lib/cheerpx-loader.js';
+
 // Side-effect import so the bundled CSS gets emitted alongside the JS.
 import './styles/index.css';

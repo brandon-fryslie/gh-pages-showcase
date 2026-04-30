@@ -23,6 +23,9 @@ export default defineConfig({
         'gsap',
         'gsap/ScrollTrigger',
         'lenis',
+        '@leaningtech/cheerpx',
+        '@xterm/xterm',
+        '@xterm/addon-fit',
       ],
       output: {
         assetFileNames: (asset) => {

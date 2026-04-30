@@ -1,0 +1,49 @@
+# showcase-kit WebVM base image
+#
+# Projects extend this with their own install steps:
+#
+#     FROM ghcr.io/brandon-fryslie/showcase-kit-webvm-base:latest
+#     RUN apt-get update && apt-get install -y python3-pip
+#     RUN pip3 install --break-system-packages mypackage
+#     # ... project-specific setup
+#
+# Or build the base from source via build-image.sh by setting
+# `BASE_IMAGE_DOCKERFILE=Dockerfile.base` in the environment.
+#
+# Conventions baked in:
+#   - non-root `user` account at uid/gid 1000 (matches WebVMTerminal's run() uid)
+#   - locale/UTF-8 generated
+#   - bash as default shell
+#   - sudo NOPASSWD for `user`
+#   - common interactive tools (curl, less, vim-tiny) preinstalled
+
+FROM debian:bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      bash coreutils sudo locales \
+      ca-certificates curl less \
+      vim-tiny nano \
+      procps psmisc \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -g 1000 user && \
+    useradd -m -u 1000 -g 1000 -s /bin/bash user && \
+    echo 'user ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/user
+
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
+ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
+USER user
+WORKDIR /home/user
+
+# Friendly default profile so the visitor's first impression isn't a bare $.
+RUN printf '%s\n' \
+    'export PS1="\[\e[36m\]\u@webvm\[\e[0m\]:\[\e[33m\]\w\[\e[0m\]\$ "' \
+    'alias ls="ls --color=auto"' \
+    'alias ll="ls -lah"' \
+  > /home/user/.bashrc
+
+CMD ["/bin/bash", "--login"]
