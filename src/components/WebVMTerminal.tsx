@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { loadCheerpX, isCrossOriginIsolated, type CheerpXLinuxInstance } from '../lib/cheerpx-loader.js';
+import { loadCheerpX, isCrossOriginIsolated, bootstrapCoi, type CheerpXLinuxInstance } from '../lib/cheerpx-loader.js';
 
 /**
  * Live in-browser Linux terminal for project showcases.
@@ -142,6 +142,12 @@ export function WebVMTerminal({
     let disposed = false;
 
     async function boot() {
+      // [LAW:single-enforcer] COI lifecycle is owned by bootstrapCoi.
+      // It self-heals stale service workers from prior deploys/versions and
+      // reloads when needed — that reload aborts this boot, the next page
+      // load reaches isCrossOriginIsolated() === true.
+      await bootstrapCoi();
+      if (disposed) return;
       if (!isCrossOriginIsolated()) {
         setPhase({
           kind: 'error',

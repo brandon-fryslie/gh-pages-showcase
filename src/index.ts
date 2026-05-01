@@ -28,7 +28,8 @@ export type {
   WebVMDiskImage,
   WebVMSuggestedCommand,
 } from './components/WebVMTerminal.js';
-export { isCrossOriginIsolated } from './lib/cheerpx-loader.js';
+export { isCrossOriginIsolated, bootstrapCoi } from './lib/cheerpx-loader.js';
+export type { BootstrapCoiOptions } from './lib/cheerpx-loader.js';
 
 // Side-effect import so the bundled CSS gets emitted alongside the JS.
 import './styles/index.css';
